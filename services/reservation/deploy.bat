@@ -1,0 +1,1 @@
+heroku container:push web --app lab2-reservation-2 && heroku container:release web --app lab2-reservation-2 && pause

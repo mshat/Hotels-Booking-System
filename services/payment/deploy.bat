@@ -1,0 +1,1 @@
+heroku container:push web --app lab2-payment && heroku container:release web --app lab2-payment && pause

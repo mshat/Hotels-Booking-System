@@ -1,0 +1,1 @@
+heroku container:push web --app lab2-gateway && heroku container:release web --app lab2-gateway && pause

@@ -1,0 +1,74 @@
+version: "3"
+services:
+  postgres:
+    image: library/postgres:13
+    container_name: postgres
+    restart: on-failure
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./postgres/:/docker-entrypoint-initdb.d/
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - 5432:5432
+
+  gateway-service:
+    build: ./services/gateway
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./services/gateway/:/usr/src/gateway
+    ports:
+      - 8000:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  reservation-service:
+    build: ./services/reservation
+    environment:
+      DB_MODE: "local"  # heroku / k8s / local
+    command: /bin/sh -c "python3 manage.py makemigrations && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8001"
+    volumes:
+      - ./services/reservation/:/usr/src/reservation
+    ports:
+      - 8001:8001
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  loyalty-service:
+    build: ./services/loyalty
+    environment:
+      DB_MODE: "local"  # heroku / k8s / local
+    command: /bin/sh -c "python3 manage.py makemigrations && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8003"
+    volumes:
+      - ./services/loyalty/:/usr/src/loyalty
+    ports:
+      - 8003:8003
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  payment-service:
+    build: ./services/payment
+    environment:
+      DB_MODE: "local"  # heroku / k8s / local
+    command: /bin/sh -c "python3 manage.py makemigrations && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8002"
+    volumes:
+      - ./services/payment/:/usr/src/payment
+    ports:
+      - 8002:8002
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+
+volumes:
+  db-data:
