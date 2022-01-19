@@ -1,5 +1,7 @@
 ## Hotels Booking System
 
+![GitHub Classroom Workflow](../../workflows/GitHub%20Classroom%20Workflow/badge.svg?branch=master)
+
 Система предоставляет пользователю сервис поиска и бронирования отелей на интересующие даты. В зависимости от количества
 заказов система лояльности дает скидку пользователю на новые бронирования.
 
