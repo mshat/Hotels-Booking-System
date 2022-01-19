@@ -4,10 +4,9 @@ import threading
 from time import time, sleep
 from requests.exceptions import ConnectionError
 from env import get_uri
+from os import environ
 
-
-REDIS_URL = 'redis://redistogo:c1c4907a8e76ab844e2b50672864245f@sole.redistogo.com:9830/'
-
+REDIS_URL = environ.get("REDIS_URL")
 OPEN, CLOSED = 0, 1
 
 
