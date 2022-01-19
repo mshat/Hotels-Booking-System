@@ -1,9 +1,16 @@
+import requests
+import json
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-import requests
 from .env import get_uri
-import json
+from os import environ
+from circuit_breaker import CircuitBreaker, Fallback
+from redis import from_url
+
+REDIS_URL = environ.get("REDIS_URL")
+redis_instance = from_url(REDIS_URL)
+circuit_breaker = CircuitBreaker(redis_instance, errors_num_before_opening=0)
 
 
 class PersonView(APIView):
