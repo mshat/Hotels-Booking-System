@@ -22,25 +22,25 @@ jobs:
 
       - name: Install Dependencies gateway
         run: |
-          cd ./gateway
+          cd ./services/gateway
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Install Dependencies loyalty
         run: |
-          cd ./loyalty
+          cd ./services/loyalty
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Install Dependencies payment
         run: |
-          cd ./payment
+          cd ./services/payment
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Install Dependencies reservation
         run: |
-          cd ./reservation
+          cd ./services/reservation
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
@@ -50,7 +50,7 @@ jobs:
           heroku_api_key: 0e65cd29-773b-4f97-84d3-bea254ce2665
           heroku_app_name: lab2-gateway
           heroku_email: privedtmedved@gmail.com
-          appdir: ./gateway/
+          appdir: ./services/gateway/
           usedocker: true
 
       - name: Deploy project loyalty
@@ -59,7 +59,7 @@ jobs:
           heroku_api_key: 0e65cd29-773b-4f97-84d3-bea254ce2665
           heroku_app_name: lab2-loyalty
           heroku_email: privedtmedved@gmail.com
-          appdir: ./loyalty/
+          appdir: ./services/loyalty/
           usedocker: true
 
       - name: Deploy project payment
@@ -68,7 +68,7 @@ jobs:
           heroku_api_key: 0e65cd29-773b-4f97-84d3-bea254ce2665
           heroku_app_name: lab2-payment
           heroku_email: privedtmedved@gmail.com
-          appdir: ./payment/
+          appdir: ./services/payment/
           usedocker: true
 
       - name: Deploy project Reservation
@@ -77,7 +77,7 @@ jobs:
           heroku_api_key: 0e65cd29-773b-4f97-84d3-bea254ce2665
           heroku_app_name: lab2-reservation-2
           heroku_email: privedtmedved@gmail.com
-          appdir: ./reservation/
+          appdir: ./services/reservation/
           usedocker: true
 
       - name: Run API Tests
