@@ -44,7 +44,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Deploy project Gateway
+      - name: Install Dependencies worker
+        run: |
+          cd ./services/worker
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Deploy project gateway
         uses: akhileshns/heroku-deploy@v3.4.6
         with:
           heroku_api_key: ${{ secrets.heroku_api_key }}
@@ -71,7 +77,7 @@ jobs:
           appdir: ./services/payment/
           usedocker: true
 
-      - name: Deploy project Reservation
+      - name: Deploy project reservation
         uses: akhileshns/heroku-deploy@v3.4.6
         with:
           heroku_api_key: ${{ secrets.heroku_api_key }}
@@ -80,11 +86,20 @@ jobs:
           appdir: ./services/reservation/
           usedocker: true
 
+      - name: Deploy project worker
+        uses: akhileshns/heroku-deploy@v3.4.6
+        with:
+          heroku_api_key: ${{ secrets.heroku_api_key }}
+          heroku_app_name: lab2-redis-worker
+          heroku_email: ${{ secrets.heroku_email }}
+          appdir: ./services/worker/
+          usedocker: true
+
       - name: Run API Tests
         id: run-newman
         uses: anthonyvscode/newman-action@v1
         with:
-          collection: api_tests/postman/[rsoi] [lab2] postman_collection.json
+          collection: api_tests/postman/[rsoi] [lab3] postman_collection.json
           environment: api_tests/postman/[rsoi][heroku] postman_environment.json
           delayRequest: 50
           reporters: cli
