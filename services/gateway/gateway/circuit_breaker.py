@@ -1,9 +1,9 @@
 import requests
-from requests.models import Response
-from time import time, sleep
-from .uri import Url, Uri
-from rest_framework import status
+from time import time
 from requests.exceptions import ConnectionError
+from requests.models import Response
+from rest_framework import status
+from .uri import Url, Uri
 from .logger import Logger
 
 OPEN, CLOSED = 0, 1

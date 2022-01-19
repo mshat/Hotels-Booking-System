@@ -81,10 +81,10 @@ def circuit_breaker_worker(redis_instance):
     tag = 'circuit_breaker_worker'
     while True:
         keys = redis_instance.keys()
-        print(f'\nredis_instance.keys:\n{keys}\n\n')
+        my_print2(f'\nredis_instance.keys:\n{keys}\n\n')
 
         if redis_instance.llen('str:circuit_breaker_items:1') > 0:
-            print(f"[{tag}] len of circuit_breaker_items > 0!!!")
+            my_print2(f"[{tag}] len of circuit_breaker_items > 0!!!")
             url = redis_instance.lpop('str:circuit_breaker_items:1').decode('UTF-8')
 
             redis_keys = list(map(bytes.decode, redis_instance.keys()))
@@ -97,48 +97,48 @@ def circuit_breaker_worker(redis_instance):
             state = redis_instance.get(f'int:circuit_breaker_state:{url}').decode('UTF-8')
             last_time = redis_instance.get(f'str:circuit_breaker_time:{url}').decode('UTF-8')
 
-            print(f"[{tag}] URL: {url}")
-            print(f"[{tag}] STATE: {state}")
-            print(f"[{tag}] LAST_TIME: {last_time}")
+            my_print2(f"[{tag}] URL: {url}")
+            my_print2(f"[{tag}] STATE: {state}")
+            my_print2(f"[{tag}] LAST_TIME: {last_time}")
 
             if int(state) == CLOSED:
                 assert url != None
                 redis_instance.rpush('str:circuit_breaker_items:1', url)
                 continue
 
-            print(f"[{tag}] time passed: " + str(time() - float(last_time)))
+            my_print2(f"[{tag}] time passed: " + str(time() - float(last_time)))
             if time() - float(last_time) > 5:  # TODO потом получать из редиса
                 try:
-                    print(f'[{tag}] Health check request')
+                    my_print2(f'[{tag}] Health check request')
                     response = requests.get(url)
                 except ConnectionError as e:
                     assert url != None
                     redis_instance.rpush('str:circuit_breaker_items:1', url)
-                    print(f"[{tag}] DEBUG Я ПОМЕНЯЛ ЛАСТ ТАЙМ при ConnectionError")
+                    my_print2(f"[{tag}] DEBUG Я ПОМЕНЯЛ ЛАСТ ТАЙМ при ConnectionError")
                     redis_instance.set(f'str:circuit_breaker_time:{url}', str(time()))
-                    print(f"[{tag}] request failed error: {e}")
+                    my_print2(f"[{tag}] request failed error: {e}")
                     continue
                 if response.status_code // 100 == 5:
                     assert url != None
                     redis_instance.rpush('str:circuit_breaker_items:1', url)
-                    print(f"[{tag}] DEBUG Я ПОМЕНЯЛ ЛАСТ ТАЙМ при esponse.status_code // 100 == 5")
+                    my_print2(f"[{tag}] DEBUG Я ПОМЕНЯЛ ЛАСТ ТАЙМ при esponse.status_code // 100 == 5")
                     redis_instance.set(f'str:circuit_breaker_time:{url}', str(time()))
-                    print(f"[{tag}] request failed: {response.status_code} code")
+                    my_print2(f"[{tag}] request failed: {response.status_code} code")
                     continue
                 else:
                     redis_instance.set(f'int:circuit_breaker_state:{url}', CLOSED)
                     assert url != None
                     redis_instance.rpush('str:circuit_breaker_items:1', url)
-                    print(f"[{tag}] Health check request succeeded: {response.status_code} code")
+                    my_print2(f"[{tag}] Health check request succeeded: {response.status_code} code")
                     continue
             else:
                 assert url != None
                 redis_instance.rpush('str:circuit_breaker_items:1', url)
                 sleep(1)
-                print(f'[{tag}] Sleep 1 second because 10 seconds not less')
+                my_print2(f'[{tag}] Sleep 1 second because 10 seconds not less')
         else:
             sleep(1)
-            print(f'[{tag}] Sleep 1 second because queue is empty')
+            my_print2(f'[{tag}] Sleep 1 second because queue is empty')
 
 
 def my_print(msg):
@@ -150,6 +150,11 @@ def my_print(msg):
     #     return
     # else:
     #     print(msg)
+
+
+def my_print2(msg):
+    pass
+    #print(msg)
 
 
 if __name__ == '__main__':

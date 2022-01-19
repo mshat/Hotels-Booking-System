@@ -22,7 +22,8 @@ services:
   gateway-service:
     build: ./services/gateway
     environment:
-      MODE: dev
+      MODE: "dev"
+      REDIS_URL: "redis://redistogo:c1c4907a8e76ab844e2b50672864245f@sole.redistogo.com:9830/"
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./services/gateway/:/usr/src/gateway
@@ -33,10 +34,10 @@ services:
         condition: service_healthy
 
   reservation-service:
-    environment:
-      DB_MODE: local  # heroku / k8s / local
-      MODE: dev
     build: ./services/reservation
+    environment:
+      DB_MODE: "local" # heroku / k8s / local
+      MODE: "dev"
     command: /bin/sh -c "python3 manage.py makemigrations && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8001"
     volumes:
       - ./services/reservation/:/usr/src/reservation
@@ -49,7 +50,7 @@ services:
   loyalty-service:
     build: ./services/loyalty
     environment:
-      DB_MODE: local  # heroku / k8s / local
+      DB_MODE: "local" # heroku / k8s / local
     command: /bin/sh -c "python3 manage.py makemigrations && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8003"
     volumes:
       - ./services/loyalty/:/usr/src/loyalty
@@ -62,7 +63,7 @@ services:
   payment-service:
     build: ./services/payment
     environment:
-      DB_MODE: local  # heroku / k8s / local
+      DB_MODE: "local" # heroku / k8s / local
     command: /bin/sh -c "python3 manage.py makemigrations && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8002"
     volumes:
       - ./services/payment/:/usr/src/payment
@@ -74,10 +75,13 @@ services:
 
   redis_worker:
     build: ./services/worker
+    environment:
+      REDIS_URL: "redis://redistogo:c1c4907a8e76ab844e2b50672864245f@sole.redistogo.com:9830/"
     command: python startredis.py
+    volumes:
+      - ./services/worker/:/usr/src/worker
     ports:
       - 8004:8004
-
 
 volumes:
   db-data:

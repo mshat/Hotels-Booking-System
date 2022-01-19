@@ -1,5 +1,6 @@
 import requests
 
+
 class UriPart:
     EXTRA_SUBSTRINGS = ('://', '/', ':', '?')
 
@@ -59,20 +60,16 @@ class Query(UriPart):
         super().__init__(part, left_service_substring=left_service_substring, **kwargs)
 
 
-class Uri:
-    def __init__(self, other=None, scheme='http', host='127.0.0.1', port='', path='', query=''):
+class Url:
+    def __init__(self, other=None, scheme='http', host='127.0.0.1', port=''):
         if other:
             self._scheme = other.scheme
             self._host = other.host
             self._port = other.port
-            self._path = other.path
-            self._query = other.query
         else:
             self._scheme = Scheme(scheme)
             self._host = Host(host)
             self._port = Port(port)
-            self._path = Path(path)
-            self._query = Query(query)
 
     @property
     def scheme(self):
@@ -97,6 +94,24 @@ class Uri:
     @port.setter
     def port(self, val):
         self._port = Port(val)
+
+    @property
+    def str(self):
+        return self.__str__()
+
+    def __str__(self):
+        return f'{self.scheme}{self._host}{self._port}'
+
+
+class Uri(Url):
+    def __init__(self, other=None, scheme='http', host='127.0.0.1', port='', path='', query=''):
+        super().__init__(other, scheme, host, port)
+        if other:
+            self._path = other.path
+            self._query = other.query
+        else:
+            self._path = Path(path)
+            self._query = Query(query)
 
     @property
     def path(self):
