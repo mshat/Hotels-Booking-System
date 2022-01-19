@@ -1,0 +1,1 @@
+heroku container:push worker --app lab2-redis-worker && heroku container:release worker --app lab2-redis-worker && pause

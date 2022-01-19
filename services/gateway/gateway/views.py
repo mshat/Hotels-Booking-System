@@ -1,22 +1,37 @@
+import requests
+import json
+import time
+from os import environ
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-import requests
+from redis import from_url
 from .env import get_uri
-import json
+from .circuit_breaker import CircuitBreaker, Fallback
+
+REDIS_URL = environ.get("REDIS_URL")
+redis_instance = from_url(REDIS_URL)
+circuit_breaker = CircuitBreaker(redis_instance, errors_num_before_opening=0)
 
 
 class PersonView(APIView):
     def get(self, request):
         reservation_service_uri = get_uri('reservation')
         reservation_service_uri.path = 'reservations'
-        reservations_response = requests.get(reservation_service_uri.str)
+        reservations_response = circuit_breaker.get(reservation_service_uri)
+        reservations_data = reservations_response.json()
 
         loyalty_service_uri = get_uri('loyalty')
-        loyalty_response = requests.get(loyalty_service_uri.str, headers={"X-User-Name": "Test Max"})
+        loyalty_response = circuit_breaker.get(loyalty_service_uri, headers={"X-User-Name": "Test Max"})
+
+        if loyalty_response.status_code == 200:
+            loyalty_data = loyalty_response.json()
+        else:
+            loyalty_data = ''
+
         data = {
-            "reservations": reservations_response.json(),
-            "loyalty": loyalty_response.json()
+            "reservations": reservations_data,
+            "loyalty": loyalty_data,
         }
         return Response(status=status.HTTP_200_OK, data=data)
 
@@ -30,16 +45,16 @@ class HotelsListView(APIView):
         else:
             raise Exception()
 
-        response = requests.get(reservation_service_uri.str)
-        return Response(status=status.HTTP_200_OK, data=response.json())
+        response = circuit_breaker.get(reservation_service_uri)
+        return Response(status=response.status_code, data=response.json())
 
 
 class ReservationsListView(APIView):
     def get(self, request):
         reservation_service_uri = get_uri('reservation')
         reservation_service_uri.path = 'reservations'
-        response = requests.get(reservation_service_uri.str)
-        return Response(status=status.HTTP_200_OK, data=response.json())
+        response = circuit_breaker.get(reservation_service_uri)
+        return Response(status=response.status_code, data=response.json())
 
     def post(self, request):
         reservation_service_uri = get_uri('reservation')
@@ -54,7 +69,7 @@ class ReservationsListView(APIView):
         # Запрос к Reservation Service для проверки, что такой отель существует
         try:
             reservation_service_uri.path = 'hotels'
-            hotels_get_response = requests.get(reservation_service_uri.str)
+            hotels_get_response = requests.get(reservation_service_uri.str)  # circuit_breaker
         except Exception as e:
             return Response(status=status.HTTP_503_SERVICE_UNAVAILABLE,
                             data={'message': 'Reservation Service unavailable'})
@@ -98,13 +113,25 @@ class ReservationView(APIView):
         reservation_service_uri = get_uri('reservation')
         reservation_service_uri.path = f'reservation/{uid}'
 
-        response = requests.get(reservation_service_uri.str)
-        return Response(status=status.HTTP_200_OK, data=response.json())
+        response = circuit_breaker.get(reservation_service_uri)
+        return Response(status=response.status_code, data=response.json())
 
     def delete(self, request, uid):
         loyalty_service_uri = get_uri('loyalty')
         username = request.headers["x-user-name"]
-        requests.delete(loyalty_service_uri.str, headers={"X-User-Name": username})
+        try:
+            delete_loyalty_response = requests.delete(str(loyalty_service_uri), headers={"X-User-Name": username})
+        except Exception as e:
+            redis_instance.rpush('str:delete_reservation_usernames:1', username)
+            redis_instance.set(f'str:delete_reservation_uid:{username}', uid)
+            redis_instance.set(f'str:delete_reservation_time:{username}', str(time.time()))
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        if delete_loyalty_response.status_code != 200:
+            redis_instance.rpush('str:delete_reservation_usernames:1', username)
+            redis_instance.set(f'str:delete_reservation_uid:{username}', uid)
+            redis_instance.set(f'str:delete_reservation_time:{username}', str(time.time()))
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
         reservation_service_uri = get_uri('reservation')
         reservation_service_uri.path = f"reservation/{uid}"
@@ -125,8 +152,17 @@ class LoyaltyView(APIView):
     def get(self, request):
         loyalty_service_uri = get_uri('loyalty')
         username = request.headers["x-user-name"]
-        response = requests.get(loyalty_service_uri.str, headers={"X-User-Name": username})
-        return Response(status=status.HTTP_200_OK, data=response.json())
+
+        circuit_breaker.add_url_for_tracking(
+            url=loyalty_service_uri,
+            fallback=Fallback(status=status.HTTP_503_SERVICE_UNAVAILABLE,
+                              data={'message': 'Loyalty Service unavailable'}))
+        response = circuit_breaker.get(loyalty_service_uri, headers={"X-User-Name": username})
+        if response.status_code != 200:  # TODO
+            data = {'message': 'Loyalty Service unavailable'}
+        else:
+            data = response.json()
+        return Response(status=response.status_code, data=data)
 
 
 class PaymentsListView(APIView):
@@ -134,7 +170,7 @@ class PaymentsListView(APIView):
         payment_service_uri = get_uri('payment')
         payment_service_uri.path = 'payments'
 
-        response = requests.get(payment_service_uri)
+        response = circuit_breaker.get(payment_service_uri)
         return Response(status=response.status_code, data=response.json())
 
     def post(self, request):
@@ -154,11 +190,10 @@ class PaymentView(APIView):
         payment_service_uri = get_uri('payment')
         payment_service_uri.path = f'payment/{uid}'
 
-        response = requests.get(payment_service_uri.str)
-        return Response(status=status.HTTP_200_OK, data=response.json())
+        circuit_breaker.add_url_for_tracking(
+            url=payment_service_uri,
+            fallback=Fallback(status=status.HTTP_503_SERVICE_UNAVAILABLE,
+                              data={'message': 'Payment service unavailable'}))
 
-        
-
-
-
-
+        response = circuit_breaker.get(payment_service_uri)
+        return Response(status=response.status_code, data=response.json())

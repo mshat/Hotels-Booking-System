@@ -96,6 +96,7 @@ DATABASES = {
     },
 }
 
+print(environ)
 if 'DB_MODE' in environ:
     MODE = environ["DB_MODE"]
 else:
