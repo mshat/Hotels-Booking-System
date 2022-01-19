@@ -79,8 +79,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'dd7j9n3nfp1etb',
         'USER': 'uvfghkyklwkggg',
-        'PASSWORD': '2939f3b7f354bafc1bd81099afef0d1b84fa6e68c24b6c79acf852899453d114',
-        'HOST': 'ec2-35-169-103-164.compute-1.amazonaws.com',
+        'PASSWORD': environ.get("PAYMENT_DB_PASSWORD"),
+        'HOST': environ.get("PAYMENT_DB_HOST"),
         'PORT': 5432,
     },
     'local': {

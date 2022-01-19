@@ -72,6 +72,12 @@ services:
       postgres:
         condition: service_healthy
 
+  redis_worker:
+    build: ./services/worker
+    command: python startredis.py
+    ports:
+      - 8004:8004
+
 
 volumes:
   db-data:
