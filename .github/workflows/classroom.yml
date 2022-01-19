@@ -11,12 +11,12 @@ jobs:
     name: Autograding
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@api_tests
+      - uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
       - name: Set up Python 3.9
-        uses: actions/setup-python@api_tests
+        uses: actions/setup-python@v2
         with:
           python-version: 3.9
 
