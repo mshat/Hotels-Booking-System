@@ -20,80 +20,80 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Install Dependencies gateway
-        run: |
-          cd ./services/gateway
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Install Dependencies loyalty
-        run: |
-          cd ./services/loyalty
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Install Dependencies payment
-        run: |
-          cd ./services/payment
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Install Dependencies reservation
-        run: |
-          cd ./services/reservation
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Install Dependencies worker
-        run: |
-          cd ./services/worker
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Deploy project gateway
-        uses: akhileshns/heroku-deploy@v3.4.6
-        with:
-          heroku_api_key: ${{ secrets.heroku_api_key }}
-          heroku_app_name: lab2-gateway
-          heroku_email: ${{ secrets.heroku_email }}
-          appdir: ./services/gateway/
-          usedocker: true
-
-      - name: Deploy project loyalty
-        uses: akhileshns/heroku-deploy@v3.4.6
-        with:
-          heroku_api_key: ${{ secrets.heroku_api_key }}
-          heroku_app_name: lab2-loyalty
-          heroku_email: ${{ secrets.heroku_email }}
-          appdir: ./services/loyalty/
-          usedocker: true
-
-      - name: Deploy project payment
-        uses: akhileshns/heroku-deploy@v3.4.6
-        with:
-          heroku_api_key: ${{ secrets.heroku_api_key }}
-          heroku_app_name: lab2-payment
-          heroku_email: ${{ secrets.heroku_email }}
-          appdir: ./services/payment/
-          usedocker: true
-
-      - name: Deploy project reservation
-        uses: akhileshns/heroku-deploy@v3.4.6
-        with:
-          heroku_api_key: ${{ secrets.heroku_api_key }}
-          heroku_app_name: lab2-reservation-2
-          heroku_email: ${{ secrets.heroku_email }}
-          appdir: ./services/reservation/
-          usedocker: true
-
-      - name: Deploy project worker
-        uses: akhileshns/heroku-deploy@v3.4.6
-        with:
-          heroku_api_key: ${{ secrets.heroku_api_key }}
-          heroku_app_name: lab2-redis-worker
-          heroku_email: ${{ secrets.heroku_email }}
-          appdir: ./services/worker/
-          usedocker: true
+#      - name: Install Dependencies gateway
+#        run: |
+#          cd ./services/gateway
+#          python -m pip install --upgrade pip
+#          pip install -r requirements.txt
+#
+#      - name: Install Dependencies loyalty
+#        run: |
+#          cd ./services/loyalty
+#          python -m pip install --upgrade pip
+#          pip install -r requirements.txt
+#
+#      - name: Install Dependencies payment
+#        run: |
+#          cd ./services/payment
+#          python -m pip install --upgrade pip
+#          pip install -r requirements.txt
+#
+#      - name: Install Dependencies reservation
+#        run: |
+#          cd ./services/reservation
+#          python -m pip install --upgrade pip
+#          pip install -r requirements.txt
+#
+#      - name: Install Dependencies worker
+#        run: |
+#          cd ./services/worker
+#          python -m pip install --upgrade pip
+#          pip install -r requirements.txt
+#
+#      - name: Deploy project gateway
+#        uses: akhileshns/heroku-deploy@v3.4.6
+#        with:
+#          heroku_api_key: ${{ secrets.heroku_api_key }}
+#          heroku_app_name: lab2-gateway
+#          heroku_email: ${{ secrets.heroku_email }}
+#          appdir: ./services/gateway/
+#          usedocker: true
+#
+#      - name: Deploy project loyalty
+#        uses: akhileshns/heroku-deploy@v3.4.6
+#        with:
+#          heroku_api_key: ${{ secrets.heroku_api_key }}
+#          heroku_app_name: lab2-loyalty
+#          heroku_email: ${{ secrets.heroku_email }}
+#          appdir: ./services/loyalty/
+#          usedocker: true
+#
+#      - name: Deploy project payment
+#        uses: akhileshns/heroku-deploy@v3.4.6
+#        with:
+#          heroku_api_key: ${{ secrets.heroku_api_key }}
+#          heroku_app_name: lab2-payment
+#          heroku_email: ${{ secrets.heroku_email }}
+#          appdir: ./services/payment/
+#          usedocker: true
+#
+#      - name: Deploy project reservation
+#        uses: akhileshns/heroku-deploy@v3.4.6
+#        with:
+#          heroku_api_key: ${{ secrets.heroku_api_key }}
+#          heroku_app_name: lab2-reservation-2
+#          heroku_email: ${{ secrets.heroku_email }}
+#          appdir: ./services/reservation/
+#          usedocker: true
+#
+#      - name: Deploy project worker
+#        uses: akhileshns/heroku-deploy@v3.4.6
+#        with:
+#          heroku_api_key: ${{ secrets.heroku_api_key }}
+#          heroku_app_name: lab2-redis-worker
+#          heroku_email: ${{ secrets.heroku_email }}
+#          appdir: ./services/worker/
+#          usedocker: true
 
       - name: Run API Tests
         id: run-newman
