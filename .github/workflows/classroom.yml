@@ -102,7 +102,8 @@ jobs:
           collection: api_tests/postman/[rsoi][lab3] postman_collection.json
           environment: api_tests/postman/[rsoi][heroku] postman_environment.json
           delayRequest: 50
-          reporters: cli
+          reporters: '[ "cli" ]'
+          envVar: '[{ "key":"serviceName", "value":"lab2-loyalty" }, { "key":"herokuApiToken", "value":"0e65cd29-773b-4f97-84d3-bea254ce2665" }]'
 
       - uses: education/autograding@v1
         id: autograder
