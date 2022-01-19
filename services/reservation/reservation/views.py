@@ -8,8 +8,6 @@ from rest_framework.generics import get_object_or_404, GenericAPIView
 from .models import Hotel, Reservation
 from .serializers import HotelSerializer, ReservationSerializer
 from .pagination import CustomPagination
-import sys
-sys.path.append("..")
 from .env import get_uri
 
 
@@ -38,7 +36,7 @@ class ReservationsListView(APIView):
 
         gateway_service_uri = get_uri('gateway')
         gateway_service_uri.path = f'api/v1/payments'
-        get_payments_response = requests.get(str(gateway_service_uri))
+        get_payments_response = requests.get(gateway_service_uri.str)
         if get_payments_response.status_code != 200:
             error_message = get_payments_response.json()
             payment_status = error_message
@@ -74,7 +72,7 @@ class ReservationsListView(APIView):
 
         gateway_service_uri = get_uri('gateway')
         gateway_service_uri.path = 'api/v1/loyalty'
-        loyalty_get_response = requests.get(str(gateway_service_uri), headers={'X-User-Name': username})
+        loyalty_get_response = requests.get(gateway_service_uri.str, headers={'X-User-Name': username})
         if loyalty_get_response.status_code != 200:
             return Response(status=loyalty_get_response.status_code, data=loyalty_get_response.json())
         loyalty_data = loyalty_get_response.json()
@@ -100,7 +98,7 @@ class ReservationsListView(APIView):
 
         gateway_service_uri = get_uri('gateway')
         gateway_service_uri.path = f'api/v1/payments'
-        post_payment_response = requests.post(str(gateway_service_uri), data={"price": booking_cost})
+        post_payment_response = requests.post(gateway_service_uri.str, data={"price": booking_cost})
         if post_payment_response.status_code != 200:
             return Response(status=post_payment_response.status_code, data=post_payment_response.json())
         new_payment_data = post_payment_response.json()

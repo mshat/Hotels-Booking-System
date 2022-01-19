@@ -3,9 +3,6 @@ from rest_framework.views import APIView
 from rest_framework import status
 import requests
 from .env import get_uri
-import sys
-sys.path.append("..")
-from my_modules import my_requests
 import json
 
 
@@ -13,10 +10,10 @@ class PersonView(APIView):
     def get(self, request):
         reservation_service_uri = get_uri('reservation')
         reservation_service_uri.path = 'reservations'
-        reservations_response = requests.get(str(reservation_service_uri))
+        reservations_response = requests.get(reservation_service_uri.str)
 
         loyalty_service_uri = get_uri('loyalty')
-        loyalty_response = requests.get(str(loyalty_service_uri), headers={"X-User-Name": "Test Max"})
+        loyalty_response = requests.get(loyalty_service_uri.str, headers={"X-User-Name": "Test Max"})
         data = {
             "reservations": reservations_response.json(),
             "loyalty": loyalty_response.json()
@@ -33,7 +30,7 @@ class HotelsListView(APIView):
         else:
             raise Exception()
 
-        response = requests.get(str(reservation_service_uri))
+        response = requests.get(reservation_service_uri.str)
         return Response(status=status.HTTP_200_OK, data=response.json())
 
 
@@ -41,7 +38,7 @@ class ReservationsListView(APIView):
     def get(self, request):
         reservation_service_uri = get_uri('reservation')
         reservation_service_uri.path = 'reservations'
-        response = requests.get(str(reservation_service_uri))
+        response = requests.get(reservation_service_uri.str)
         return Response(status=status.HTTP_200_OK, data=response.json())
 
     def post(self, request):
@@ -57,7 +54,7 @@ class ReservationsListView(APIView):
         # Запрос к Reservation Service для проверки, что такой отель существует
         try:
             reservation_service_uri.path = 'hotels'
-            hotels_get_response = requests.get(str(reservation_service_uri))
+            hotels_get_response = requests.get(reservation_service_uri.str)
         except Exception as e:
             return Response(status=status.HTTP_503_SERVICE_UNAVAILABLE,
                             data={'message': 'Reservation Service unavailable'})
@@ -77,7 +74,7 @@ class ReservationsListView(APIView):
 
         # Запрос к Loyalty Service для увеличения счетчика бронирований
         try:
-            loyalty_patch_response = requests.patch(str(loyalty_service_uri), headers={"X-User-Name": username})
+            loyalty_patch_response = requests.patch(loyalty_service_uri.str, headers={"X-User-Name": username})
         except Exception as e:
             return Response(status=status.HTTP_503_SERVICE_UNAVAILABLE, data={'message': 'Loyalty Service unavailable'})
         if loyalty_patch_response.status_code == 503:
@@ -85,7 +82,7 @@ class ReservationsListView(APIView):
 
         reservation_service_uri.path = 'reservations'
         reservation_post_response = requests.post(
-            str(reservation_service_uri),
+            reservation_service_uri.str,
             data=json.dumps({"hotelUid": hotel_uid, "startDate": start_date, "endDate": end_date}),
             headers={"Content-Type": "application/json", "x-user-name": username}
         )
@@ -101,28 +98,25 @@ class ReservationView(APIView):
         reservation_service_uri = get_uri('reservation')
         reservation_service_uri.path = f'reservation/{uid}'
 
-        response = requests.get(str(reservation_service_uri))
+        response = requests.get(reservation_service_uri.str)
         return Response(status=status.HTTP_200_OK, data=response.json())
 
     def delete(self, request, uid):
         loyalty_service_uri = get_uri('loyalty')
         username = request.headers["x-user-name"]
-        requests.delete(str(loyalty_service_uri), headers={"X-User-Name": username})
+        requests.delete(loyalty_service_uri.str, headers={"X-User-Name": username})
 
         reservation_service_uri = get_uri('reservation')
         reservation_service_uri.path = f"reservation/{uid}"
-        reservation_get_request = my_requests.GetRequest(reservation_service_uri)
-        reservation_response = reservation_get_request.send()
+        reservation_response = requests.get(reservation_service_uri.str)
         reservation = reservation_response.json()
 
         payment_service_uri = get_uri('payment')
         payment_service_uri.path = f"payment/{reservation['payment_uid']}"
-        payment_status_patch_request = my_requests.PatchRequest(payment_service_uri, data={"status": "CANCELED"})
-        payment_status_patch_request.send()
+        requests.post(payment_service_uri.str, data={"status": "CANCELED"})
 
         reservation_service_uri.path = f"reservation/{uid}"
-        reservation_status_patch_request = my_requests.PatchRequest(reservation_service_uri, data={"status": "CANCELED"})
-        reservation_status_patch_request.send()
+        requests.patch(reservation_service_uri.str, data={"status": "CANCELED"})
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -131,7 +125,7 @@ class LoyaltyView(APIView):
     def get(self, request):
         loyalty_service_uri = get_uri('loyalty')
         username = request.headers["x-user-name"]
-        response = requests.get(str(loyalty_service_uri), headers={"X-User-Name": username})
+        response = requests.get(loyalty_service_uri.str, headers={"X-User-Name": username})
         return Response(status=status.HTTP_200_OK, data=response.json())
 
 
@@ -148,7 +142,7 @@ class PaymentsListView(APIView):
         payment_service_uri.path = f'payments'
 
         price = request.data['price']
-        response = requests.post(str(payment_service_uri), data={'price': price})
+        response = requests.post(payment_service_uri.str, data={'price': price})
         if response.status_code == 200:
             return Response(status=status.HTTP_200_OK, data=response.json())
         else:
@@ -160,7 +154,7 @@ class PaymentView(APIView):
         payment_service_uri = get_uri('payment')
         payment_service_uri.path = f'payment/{uid}'
 
-        response = requests.get(str(payment_service_uri))
+        response = requests.get(payment_service_uri.str)
         return Response(status=status.HTTP_200_OK, data=response.json())
 
         

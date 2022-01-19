@@ -9,14 +9,14 @@ on:
 jobs:
   build:
     name: Autograding
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@api_tests
         with:
           fetch-depth: 0
 
       - name: Set up Python 3.9
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@api_tests
         with:
           python-version: 3.9
 
@@ -84,8 +84,8 @@ jobs:
         id: run-newman
         uses: anthonyvscode/newman-action@v1
         with:
-          collection: v2/postman/[rsoi] postman_collection.json
-          environment: v2/postman/[rsoi][heroku] postman_environment.json
+          collection: api_tests/postman/[rsoi] postman_collection.json
+          environment: api_tests/postman/[rsoi][heroku] postman_environment.json
           delayRequest: 50
           reporters: cli
 

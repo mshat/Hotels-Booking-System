@@ -146,8 +146,6 @@ GET {{baseUrl}}/api/v1/loyalty
 X-User-Name: {{username}}
 ```
 
-Описание в формате [OpenAPI](%5Binst%5D%5Bv2%5D%20Hotels%20Booking%20System.yml).
-
 ### Данные для тестов
 
 Создать данные для тестов:

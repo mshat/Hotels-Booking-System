@@ -1,7 +1,5 @@
-import sys
 import os
-sys.path.append("..")
-from my_modules.uri import Uri
+from .uri import Uri
 
 if 'MODE' in os.environ:
     MODE = os.environ["MODE"]
