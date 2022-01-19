@@ -84,7 +84,7 @@ jobs:
         id: run-newman
         uses: anthonyvscode/newman-action@v1
         with:
-          collection: api_tests/postman/[rsoi] postman_collection.json
+          collection: api_tests/postman/[rsoi] [lab2] postman_collection.json
           environment: api_tests/postman/[rsoi][heroku] postman_environment.json
           delayRequest: 50
           reporters: cli

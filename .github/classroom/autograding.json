@@ -3,7 +3,7 @@
     {
       "name": "Run Postman",
       "setup": "",
-      "run": "newman run -e api_tests/postman/[rsoi]\\ postman_environment.json api_tests/postman/[rsoi]\\ postman_collection.json",
+      "run": "newman run -e api_tests/postman/[rsoi]\\ postman_environment.json api_tests/postman/[rsoi] [lab3]\\ postman_collection.json",
       "input": "",
       "output": "",
       "comparison": "included",
